@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "LocalStorage Backup",
+  "version": "0.1.0",
+  "description": "Back up and restore website localStorage snapshots to your own Google Drive.",
+  "permissions": ["storage", "alarms", "scripting", "identity", "activeTab"],
+  "optional_host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "sw.js",
+    "type": "module"
+  },
+  "action": {
+    "default_popup": "popup/index.html",
+    "default_title": "LocalStorage Backup"
+  },
+  "oauth2": {
+    "client_id": "824592760071-6btbv5iq60c7c9c5n6q4epei5r484tef.apps.googleusercontent.com",
+    "scopes": ["https://www.googleapis.com/auth/drive.file"]
+  }
+}
