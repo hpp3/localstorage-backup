@@ -2,22 +2,22 @@
   <!-- Background: rounded square -->
   <rect width="128" height="128" rx="22" fill="#1a73e8"/>
 
-  <!-- Cloud: big central circle + side humps + flat base -->
+  <!-- Cloud: big central circle + side humps + flat base (vertically centered ~y=64) -->
   <g fill="#ffffff">
-    <circle cx="64" cy="52" r="26"/>
-    <circle cx="40" cy="62" r="16"/>
-    <circle cx="88" cy="62" r="16"/>
-    <rect x="30" y="62" width="68" height="22" rx="8"/>
+    <circle cx="64" cy="61" r="26"/>
+    <circle cx="40" cy="71" r="16"/>
+    <circle cx="88" cy="71" r="16"/>
+    <rect x="30" y="71" width="68" height="22" rx="8"/>
   </g>
 
   <!-- Up arrow (blue cutout inside cloud): backup = upload to Drive -->
   <path fill="#1a73e8" d="
-    M 64 40
-    L 46 60
-    L 56 60
-    L 56 78
-    L 72 78
-    L 72 60
-    L 82 60
+    M 64 49
+    L 46 69
+    L 56 69
+    L 56 87
+    L 72 87
+    L 72 69
+    L 82 69
     Z"/>
 </svg>
