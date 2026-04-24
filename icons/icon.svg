@@ -1,22 +1,23 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
-  <!-- Background: rounded square, Drive-ish blue -->
+  <!-- Background: rounded square -->
   <rect width="128" height="128" rx="22" fill="#1a73e8"/>
-  <!-- Cloud -->
-  <path fill="#ffffff" d="
-    M 40 72
-    a 18 18 0 0 1 8.5 -33
-    a 22 22 0 0 1 42 5
-    a 16 16 0 0 1 -2 32
-    L 40 76
-    z"/>
-  <!-- Down arrow (indicating backup/download to Drive) -->
-  <path fill="#1a73e8" stroke="#1a73e8" stroke-width="2" stroke-linejoin="round" d="
-    M 56 56
-    L 56 74
-    L 46 74
-    L 64 94
-    L 82 74
-    L 72 74
-    L 72 56
-    z"/>
+
+  <!-- Cloud: big central circle + side humps + flat base -->
+  <g fill="#ffffff">
+    <circle cx="64" cy="52" r="26"/>
+    <circle cx="40" cy="62" r="16"/>
+    <circle cx="88" cy="62" r="16"/>
+    <rect x="30" y="62" width="68" height="22" rx="8"/>
+  </g>
+
+  <!-- Up arrow (blue cutout inside cloud): backup = upload to Drive -->
+  <path fill="#1a73e8" d="
+    M 64 40
+    L 46 60
+    L 56 60
+    L 56 78
+    L 72 78
+    L 72 60
+    L 82 60
+    Z"/>
 </svg>
