@@ -1,0 +1,4 @@
+title: LocalStorage Backup
+description: Back up website localStorage to Google Drive. Chrome extension + mobile bookmarklet.
+theme: jekyll-theme-minimal
+show_downloads: false

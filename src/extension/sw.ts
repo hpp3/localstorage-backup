@@ -38,6 +38,7 @@ const backupInProgress = new Set<string>();
 interface Status {
   driveConnected: boolean;
   device?: DeviceInfo;
+  email?: string;
   origin?: string;
   hasPermission: boolean;
   settings?: SiteSettings;
@@ -100,15 +101,16 @@ async function disconnectDrive(): Promise<void> {
   await new Promise<void>((resolve) => {
     chrome.identity.clearAllCachedAuthTokens(() => resolve());
   });
-  await chrome.storage.sync.remove('rootFolderId');
+  await chrome.storage.sync.remove(['rootFolderId', 'email']);
 }
 
 async function getStatus(origin?: string): Promise<Status> {
-  const { device, rootFolderId } = await storage.getSync();
+  const { device, rootFolderId, email } = await storage.getSync();
   const driveConnected = !!device && !!rootFolderId;
   const status: Status = {
     driveConnected,
     device,
+    email,
     origin,
     hasPermission: false,
   };
@@ -186,12 +188,26 @@ async function tryCatchupBackup(origin: string): Promise<boolean> {
 }
 
 async function connectDrive(): Promise<DeviceInfo> {
-  await getAuthToken({ interactive: true });
+  const token = await getAuthToken({ interactive: true });
   const device = await ensureDeviceInfo();
   const client = driveClient();
   const rootFolderId = await client.findOrCreateRootFolder();
-  await storage.setSync({ rootFolderId });
+  const email = await fetchUserEmail(token);
+  await storage.setSync({ rootFolderId, ...(email ? { email } : {}) });
   return device;
+}
+
+async function fetchUserEmail(token: string): Promise<string | undefined> {
+  try {
+    const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) return undefined;
+    const json = (await res.json()) as { email?: string };
+    return json.email;
+  } catch {
+    return undefined;
+  }
 }
 
 async function initSite(origin: string): Promise<SiteSettings> {

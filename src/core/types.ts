@@ -30,7 +30,7 @@ export interface BackupListEntry {
   deviceName: string;
 }
 
-export type IntervalMinutes = 0 | 0.5 | 5 | 30 | 60 | 120 | 240 | 480 | 1440;
+export type IntervalMinutes = 0 | 5 | 30 | 60 | 120 | 240 | 480 | 1440;
 
 export interface SiteSettings {
   enabled: boolean;

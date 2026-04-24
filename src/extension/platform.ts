@@ -4,6 +4,7 @@ import { DEFAULT_SITE_SETTINGS } from '../core/types.js';
 type SyncShape = {
   device?: DeviceInfo;
   rootFolderId?: string;
+  email?: string;
 };
 
 type LocalShape = {
@@ -12,7 +13,7 @@ type LocalShape = {
 
 export const storage = {
   async getSync(): Promise<SyncShape> {
-    return (await chrome.storage.sync.get(['device', 'rootFolderId'])) as SyncShape;
+    return (await chrome.storage.sync.get(['device', 'rootFolderId', 'email'])) as SyncShape;
   },
   async setSync(patch: Partial<SyncShape>): Promise<void> {
     await chrome.storage.sync.set(patch);

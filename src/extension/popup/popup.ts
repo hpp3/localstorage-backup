@@ -4,6 +4,7 @@ import { MAX_MANUAL_BACKUPS } from '../../core/types.js';
 interface Status {
   driveConnected: boolean;
   device?: DeviceInfo;
+  email?: string;
   origin?: string;
   hasPermission: boolean;
   settings?: SiteSettings;
@@ -56,7 +57,7 @@ function render(status: Status): void {
     renderConnectDrive();
     return;
   }
-  app.append(renderLogoutButton());
+  app.append(renderAccountBar(status));
   if (!status.hasPermission || !status.settings) {
     renderAddSite(status);
     return;
@@ -64,7 +65,11 @@ function render(status: Status): void {
   renderActive(status);
 }
 
-function renderLogoutButton(): HTMLButtonElement {
+function renderAccountBar(status: Status): HTMLElement {
+  const bar = el('div', { class: 'account-bar' });
+  if (status.email) {
+    bar.append(el('span', { class: 'account-email', title: status.email }, status.email));
+  }
   const btn = document.createElement('button');
   btn.className = 'logout-btn';
   btn.setAttribute('aria-label', 'Disconnect Google Drive');
@@ -76,7 +81,8 @@ function renderLogoutButton(): HTMLButtonElement {
     '<line x1="21" y1="12" x2="9" y2="12"/>' +
     '</svg>';
   btn.addEventListener('click', () => renderDisconnectConfirm());
-  return btn;
+  bar.append(btn);
+  return bar;
 }
 
 function renderDisconnectConfirm(): void {
@@ -255,7 +261,6 @@ function renderRemoveSite(origin: string): HTMLElement {
 
 const INTERVAL_OPTIONS: Array<{ value: number; label: string }> = [
   { value: 0, label: 'Off' },
-  { value: 0.5, label: 'Every 30 seconds (test)' },
   { value: 5, label: 'Every 5 minutes' },
   { value: 30, label: 'Every 30 minutes' },
   { value: 60, label: 'Every hour' },

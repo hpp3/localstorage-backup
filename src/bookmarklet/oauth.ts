@@ -16,7 +16,22 @@ export interface ConnectResult {
 export async function connectInteractive(): Promise<ConnectResult> {
   const tokens = await openAuthPopup('');
   await storage.setAuth(tokens);
+  const email = await fetchUserEmail(tokens.accessToken);
+  if (email) await storage.setEmail(email);
   return { accessToken: tokens.accessToken };
+}
+
+async function fetchUserEmail(token: string): Promise<string | undefined> {
+  try {
+    const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) return undefined;
+    const json = (await res.json()) as { email?: string };
+    return json.email;
+  } catch {
+    return undefined;
+  }
 }
 
 async function openAuthPopup(prompt: '' | 'none' | 'consent' | 'select_account'): Promise<AuthTokens> {
@@ -93,4 +108,5 @@ export async function disconnect(): Promise<void> {
     }).catch(() => undefined);
   }
   await storage.clearAuth();
+  await storage.clearEmail();
 }

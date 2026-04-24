@@ -49,10 +49,26 @@ main {
   position: relative;
 }
 
-.logout-btn {
+.account-bar {
   position: absolute;
   top: 8px;
   right: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  max-width: calc(100% - 16px);
+}
+
+.account-email {
+  font-size: 11px;
+  color: var(--fg-muted);
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.logout-btn {
   padding: 4px;
   background: transparent;
   border: 1px solid transparent;
@@ -63,6 +79,7 @@ main {
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .logout-btn:hover:not(:disabled) {
@@ -78,7 +95,7 @@ h1 {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  padding-right: 28px;
+  padding-right: 180px;
 }
 
 .subtitle {

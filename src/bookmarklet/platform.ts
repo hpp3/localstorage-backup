@@ -84,6 +84,15 @@ export const storage = {
   async clearAuth(): Promise<void> {
     await metaDelete('auth');
   },
+  async getEmail(): Promise<string | undefined> {
+    return metaGet<string>('email');
+  },
+  async setEmail(email: string): Promise<void> {
+    await metaSet('email', email);
+  },
+  async clearEmail(): Promise<void> {
+    await metaDelete('email');
+  },
   async getSiteSettings(origin: string): Promise<SiteSettings | undefined> {
     const store = await tx(STORE_SITES, 'readonly');
     const row = await req<{ origin: string; settings: SiteSettings } | undefined>(store.get(origin));

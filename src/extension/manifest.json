@@ -1,8 +1,15 @@
 {
   "manifest_version": 3,
   "name": "LocalStorage Backup",
-  "version": "0.1.0",
-  "description": "Back up and restore website localStorage snapshots to your own Google Drive.",
+  "version": "1.0.0",
+  "description": "Back up any website's localStorage to your own Google Drive on a schedule. Perfect for preserving idle-game saves.",
+  "homepage_url": "https://github.com/hpp3/localstorage-backup",
+  "icons": {
+    "16": "icons/icon-16.png",
+    "32": "icons/icon-32.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
   "permissions": ["storage", "alarms", "scripting", "identity", "activeTab"],
   "optional_host_permissions": ["<all_urls>"],
   "background": {
@@ -11,10 +18,17 @@
   },
   "action": {
     "default_popup": "popup/index.html",
-    "default_title": "LocalStorage Backup"
+    "default_title": "LocalStorage Backup",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "32": "icons/icon-32.png"
+    }
   },
   "oauth2": {
     "client_id": "824592760071-6btbv5iq60c7c9c5n6q4epei5r484tef.apps.googleusercontent.com",
-    "scopes": ["https://www.googleapis.com/auth/drive.file"]
+    "scopes": [
+      "https://www.googleapis.com/auth/drive.file",
+      "https://www.googleapis.com/auth/userinfo.email"
+    ]
   }
 }

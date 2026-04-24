@@ -10,4 +10,5 @@ export const OAUTH_CLIENT_ID = '824592760071-rilnfnndjq3amdk260vs118mc7fdris0.ap
 // 'http://localhost:3000/auth.html' and rebuild.
 export const AUTH_URL = 'https://hpp3.github.io/localstorage-backup-site/auth.html';
 
-export const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
+export const DRIVE_SCOPE =
+  'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email';

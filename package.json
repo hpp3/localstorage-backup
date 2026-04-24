@@ -1,17 +1,24 @@
 {
   "name": "localstorage-backup",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
-  "description": "Chrome extension that backs up website localStorage to Google Drive",
+  "description": "Chrome extension + mobile bookmarklet that back up website localStorage to Google Drive",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hpp3/localstorage-backup.git"
+  },
   "type": "module",
   "scripts": {
-    "build": "node build.mjs",
+    "build": "npm run build:icons && node build.mjs",
+    "build:icons": "node scripts/gen-icons.mjs",
     "watch": "node build.mjs --watch",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
     "@types/chrome": "^0.0.287",
     "esbuild": "^0.24.0",
+    "sharp": "^0.34.5",
     "typescript": "^5.6.0"
   }
 }

@@ -75,16 +75,44 @@ async function emitBookmarkletInstallPage() {
     `javascript:(function(){var s=document.createElement('script');s.src='${mainUrl}?t='+Date.now();document.body.appendChild(s);})();`;
   const installHtml = `<!doctype html>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>LocalStorage Backup — install bookmarklet</title>
-<style>body{font-family:system-ui;max-width:640px;margin:40px auto;padding:0 16px;color:#1f2328}a.bm{display:inline-block;padding:8px 16px;background:#0969da;color:#fff;border-radius:6px;text-decoration:none}pre{white-space:pre-wrap;word-break:break-all;background:#f6f8fa;padding:12px;border-radius:6px}</style>
+<style>
+  body { font-family: system-ui; max-width: 640px; margin: 40px auto; padding: 0 16px; color: #1f2328; }
+  a.bm { display: inline-block; padding: 8px 16px; background: #0969da; color: #fff; border-radius: 6px; text-decoration: none; }
+  pre { white-space: pre-wrap; word-break: break-all; background: #f6f8fa; padding: 12px; border-radius: 6px; }
+  .row { display: flex; gap: 8px; align-items: center; margin: 8px 0; }
+  button { font: inherit; padding: 8px 14px; border: 1px solid #d0d7de; background: #f6f8fa; border-radius: 6px; cursor: pointer; }
+  button:hover:not(:disabled) { background: #e4e8ec; }
+  button.copied { background: #1a7f37; color: #fff; border-color: #1a7f37; }
+</style>
 <h1>Install the bookmarklet</h1>
-<p>Drag this link to your bookmarks bar (desktop) or long-press &rarr; "Add to bookmarks" (mobile), then edit the bookmark to rename it:</p>
+<p><b>Desktop:</b> drag this link to your bookmarks bar.</p>
+<p><b>Mobile:</b> bookmark any regular page, then edit the saved bookmark and paste the raw URL below as its address.</p>
 <p><a class="bm" href="${loader.replace(/"/g, '&quot;')}">LocalStorage Backup</a></p>
 <h2>Raw URL</h2>
-<pre>${loader}</pre>
+<div class="row">
+  <button id="copy">Copy to clipboard</button>
+  <span id="copy-status" style="color:#656d76;font-size:12px"></span>
+</div>
+<pre id="raw">${loader}</pre>
 <h2>What it points to</h2>
 <p>Main script: <code>${mainUrl}</code></p>
 <p>Auth page: <code>${authUrl || '(not set)'}</code></p>
+<script>
+document.getElementById('copy').addEventListener('click', async function () {
+  var btn = this;
+  var text = document.getElementById('raw').textContent;
+  try {
+    await navigator.clipboard.writeText(text);
+    btn.classList.add('copied');
+    btn.textContent = 'Copied!';
+    setTimeout(function () { btn.classList.remove('copied'); btn.textContent = 'Copy to clipboard'; }, 1500);
+  } catch (err) {
+    document.getElementById('copy-status').textContent = 'Copy failed — select the text manually.';
+  }
+});
+</script>
 `;
   await writeFile(resolve(bookmarkletDist, 'index.html'), installHtml);
   await writeFile(resolve(bookmarkletDist, 'bookmarklet.txt'), loader + '\n');

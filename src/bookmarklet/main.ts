@@ -16,7 +16,9 @@ const pageOrigin = location.origin;
 
 interface AppState {
   deviceName?: string;
+  email?: string;
   connected: boolean;
+  authExpired: boolean;
   rootFolderId?: string;
   settings?: SiteSettings;
   backups?: BackupListEntry[];
@@ -28,16 +30,21 @@ function driveClient(): DriveClient {
 }
 
 async function computeState(): Promise<AppState> {
-  const [device, rootFolderId, auth, settings] = await Promise.all([
+  const [device, rootFolderId, auth, settings, email] = await Promise.all([
     storage.getDevice(),
     storage.getRootFolderId(),
     storage.getAuth(),
     storage.getSiteSettings(pageOrigin),
+    storage.getEmail(),
   ]);
-  const connected = !!auth && !!rootFolderId;
+  const hasAuthRecord = !!auth && !!rootFolderId;
+  const authExpired = hasAuthRecord && Date.now() >= (auth!.expiresAt ?? 0);
+  const connected = hasAuthRecord && !authExpired;
   const state: AppState = {
     deviceName: device?.name,
+    email,
     connected,
+    authExpired,
     rootFolderId,
     settings,
   };
@@ -162,7 +169,7 @@ const STYLE = `
   @media (prefers-color-scheme: dark) {
     .panel { background: #0d1117; color: #e6edf3; border-color: #30363d; }
   }
-  h1 { font-size: 14px; margin: 0 0 2px; padding-right: 52px; overflow: hidden;
+  h1 { font-size: 14px; margin: 0 0 2px; padding-right: 200px; overflow: hidden;
        text-overflow: ellipsis; white-space: nowrap; }
   .sub { color: #656d76; font-size: 12px; margin-bottom: 8px; }
   @media (prefers-color-scheme: dark) { .sub { color: #8d96a0; } }
@@ -214,7 +221,11 @@ const STYLE = `
   @media (prefers-color-scheme: dark) {
     .kind-tag { border-color: #30363d; color: #8d96a0; }
   }
-  .top-right { position: absolute; top: 8px; right: 8px; display: flex; gap: 4px; }
+  .top-right { position: absolute; top: 8px; right: 8px; display: flex;
+    gap: 4px; align-items: center; max-width: calc(100% - 16px); }
+  .account-email { font-size: 11px; color: #656d76; max-width: 140px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  @media (prefers-color-scheme: dark) { .account-email { color: #8d96a0; } }
   .icon-btn { padding: 4px; background: transparent; border: 1px solid transparent;
     line-height: 0; color: #656d76; cursor: pointer; border-radius: 4px; }
   .icon-btn:hover { background: #f6f8fa; border-color: #d0d7de; color: #1f2328; }
@@ -241,7 +252,6 @@ const ICON_LOGOUT =
 
 const INTERVAL_OPTIONS: Array<{ value: number; label: string }> = [
   { value: 0, label: 'Off' },
-  { value: 0.5, label: 'Every 30 seconds (test)' },
   { value: 5, label: 'Every 5 minutes' },
   { value: 30, label: 'Every 30 minutes' },
   { value: 60, label: 'Every hour' },
@@ -353,7 +363,10 @@ function renderError(panel: HTMLElement, err: unknown): void {
 
 function renderHeader(state: AppState): HTMLElement {
   const wrap = el('div', { class: 'top-right' });
-  if (state.connected) {
+  if ((state.connected || state.authExpired) && state.email) {
+    wrap.append(el('span', { class: 'account-email', title: state.email }, state.email));
+  }
+  if (state.connected || state.authExpired) {
     wrap.append(
       iconButton(ICON_LOGOUT, 'Disconnect Google Drive', () => {
         if (panelRef) renderDisconnectConfirm(panelRef);
@@ -372,8 +385,36 @@ function renderHeader(state: AppState): HTMLElement {
 function renderView(panel: HTMLElement, state: AppState): void {
   panel.innerHTML = '';
   panel.append(renderHeader(state));
+  if (state.authExpired) return renderAuthExpired(panel);
   if (!state.connected) return renderConnect(panel);
   renderActive(panel, state);
+}
+
+function renderAuthExpired(panel: HTMLElement): void {
+  panel.append(
+    el('h1', {}, 'Session expired'),
+    el(
+      'div',
+      { class: 'sub' },
+      'Your Google Drive access token has expired (they last ~1 hour). Reconnect to resume.',
+    ),
+    el(
+      'div',
+      { class: 'row' },
+      labelButton('Reconnect Google Drive', 'primary', async (btn) => {
+        btn.disabled = true;
+        btn.textContent = 'Connecting…';
+        try {
+          await connectInteractive();
+          await refresh();
+        } catch (err) {
+          renderError(panel, err);
+          btn.disabled = false;
+          btn.textContent = 'Reconnect Google Drive';
+        }
+      }),
+    ),
+  );
 }
 
 function renderConnect(panel: HTMLElement): void {
@@ -552,7 +593,7 @@ function promptRestore(row: HTMLElement, trigger: HTMLButtonElement, backup: Bac
 
 function renderDisconnectConfirm(panel: HTMLElement): void {
   panel.innerHTML = '';
-  panel.append(renderHeader({ connected: false }));
+  panel.append(renderHeader({ connected: false, authExpired: false }));
   panel.append(
     el('h1', {}, 'Disconnect Google Drive?'),
     el('div', { class: 'sub' }, 'Your existing backups in Drive are kept.'),
