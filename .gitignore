@@ -5,3 +5,8 @@ dist/
 .DS_Store
 .env
 .env.local
+
+# Screenshots and ad-hoc images at the repo root (icons/ is fine).
+/Screenshot*
+/raw-screenshot*
+/screenshot-*
