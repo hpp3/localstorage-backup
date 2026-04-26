@@ -201,19 +201,17 @@ async function connectDrive(): Promise<DeviceInfo> {
 const REQUIRED_SCOPE = 'https://www.googleapis.com/auth/drive.file';
 
 async function ensureDriveScope(token: string): Promise<void> {
-  let granted: string[] = [];
+  let granted: string[];
   try {
     const res = await fetch(`https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${encodeURIComponent(token)}`);
-    if (res.ok) {
-      const json = (await res.json()) as { scope?: string };
-      granted = (json.scope ?? '').split(' ').filter(Boolean);
-    }
+    if (!res.ok) return; // tokeninfo unavailable; let later API calls surface a real error
+    const json = (await res.json()) as { scope?: string };
+    granted = (json.scope ?? '').split(' ').filter(Boolean);
   } catch {
-    // If we can't verify, fall through and let later API calls fail explicitly.
-    return;
+    return; // network or parse error; same reasoning
   }
   if (!granted.includes(REQUIRED_SCOPE)) {
-    // User unchecked Drive access in the consent screen. Token is unusable.
+    // User unchecked Drive access on the consent screen. Token is unusable.
     await new Promise<void>((resolve) => {
       chrome.identity.removeCachedAuthToken({ token }, () => resolve());
     });

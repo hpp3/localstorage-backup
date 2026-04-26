@@ -67,16 +67,22 @@
           return;
         }
         // Verify drive.file was granted (user can uncheck individual scopes
-        // on Google's consent screen). Without it, every Drive call will 403.
-        var hasDrive = google.accounts.oauth2.hasGrantedAllScopes(response, DRIVE_SCOPE);
+        // on Google's consent screen). Inspect response.scope directly rather
+        // than calling hasGrantedAllScopes — fewer API surface dependencies.
+        var grantedScopes = (response.scope || '').split(/\s+/);
+        var hasDrive = grantedScopes.indexOf(DRIVE_SCOPE) !== -1;
         if (!hasDrive) {
-          // Revoke this partial-scope token before erroring so a retry won't
-          // silently re-issue the same useless token.
-          google.accounts.oauth2.revoke(response.access_token, function () {
-            send({
-              error:
-                'Drive access was not granted. Please reconnect and keep the Drive permission checked.',
-            });
+          // Best-effort revoke so a retry won't silently re-issue the same
+          // partial-scope token from Google's session cache. Fire-and-forget
+          // so the popup always closes promptly even if revoke hangs.
+          try {
+            google.accounts.oauth2.revoke(response.access_token, function () {});
+          } catch (e) {
+            // ignore
+          }
+          send({
+            error:
+              'Drive access was not granted. Please reconnect and keep the Drive permission checked.',
           });
           return;
         }
