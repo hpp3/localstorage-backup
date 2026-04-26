@@ -50,6 +50,8 @@
 
   var tokenClient = null;
 
+  var DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
+
   function buildClient() {
     if (tokenClient) return tokenClient;
     tokenClient = google.accounts.oauth2.initTokenClient({
@@ -58,14 +60,30 @@
       callback: function (response) {
         if (response.error) {
           send({ error: response.error_description || response.error });
-        } else if (response.access_token) {
-          send({
-            access_token: response.access_token,
-            expires_in: parseInt(response.expires_in, 10) || 3600,
-          });
-        } else {
-          send({ error: 'No access_token in response' });
+          return;
         }
+        if (!response.access_token) {
+          send({ error: 'No access_token in response' });
+          return;
+        }
+        // Verify drive.file was granted (user can uncheck individual scopes
+        // on Google's consent screen). Without it, every Drive call will 403.
+        var hasDrive = google.accounts.oauth2.hasGrantedAllScopes(response, DRIVE_SCOPE);
+        if (!hasDrive) {
+          // Revoke this partial-scope token before erroring so a retry won't
+          // silently re-issue the same useless token.
+          google.accounts.oauth2.revoke(response.access_token, function () {
+            send({
+              error:
+                'Drive access was not granted. Please reconnect and keep the Drive permission checked.',
+            });
+          });
+          return;
+        }
+        send({
+          access_token: response.access_token,
+          expires_in: parseInt(response.expires_in, 10) || 3600,
+        });
       },
       error_callback: function (err) {
         send({ error: (err && (err.message || err.type)) || 'Auth cancelled' });

@@ -189,12 +189,38 @@ async function tryCatchupBackup(origin: string): Promise<boolean> {
 
 async function connectDrive(): Promise<DeviceInfo> {
   const token = await getAuthToken({ interactive: true });
+  await ensureDriveScope(token);
   const device = await ensureDeviceInfo();
   const client = driveClient();
   const rootFolderId = await client.findOrCreateRootFolder();
   const email = await fetchUserEmail(token);
   await storage.setSync({ rootFolderId, ...(email ? { email } : {}) });
   return device;
+}
+
+const REQUIRED_SCOPE = 'https://www.googleapis.com/auth/drive.file';
+
+async function ensureDriveScope(token: string): Promise<void> {
+  let granted: string[] = [];
+  try {
+    const res = await fetch(`https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${encodeURIComponent(token)}`);
+    if (res.ok) {
+      const json = (await res.json()) as { scope?: string };
+      granted = (json.scope ?? '').split(' ').filter(Boolean);
+    }
+  } catch {
+    // If we can't verify, fall through and let later API calls fail explicitly.
+    return;
+  }
+  if (!granted.includes(REQUIRED_SCOPE)) {
+    // User unchecked Drive access in the consent screen. Token is unusable.
+    await new Promise<void>((resolve) => {
+      chrome.identity.removeCachedAuthToken({ token }, () => resolve());
+    });
+    throw new Error(
+      'Drive access was not granted. Please reconnect and keep the "See, edit, create, and delete only the specific Google Drive files you use with this app" permission checked.',
+    );
+  }
 }
 
 async function fetchUserEmail(token: string): Promise<string | undefined> {
