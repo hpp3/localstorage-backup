@@ -2,21 +2,28 @@ import type { DeviceInfo, SiteSettings } from '../core/types.js';
 import { DEFAULT_SITE_SETTINGS } from '../core/types.js';
 
 type SyncShape = {
-  device?: DeviceInfo;
   rootFolderId?: string;
   email?: string;
 };
 
 type LocalShape = {
+  device?: DeviceInfo;
   siteSettings?: Record<string, SiteSettings>;
 };
 
 export const storage = {
   async getSync(): Promise<SyncShape> {
-    return (await chrome.storage.sync.get(['device', 'rootFolderId', 'email'])) as SyncShape;
+    return (await chrome.storage.sync.get(['rootFolderId', 'email'])) as SyncShape;
   },
   async setSync(patch: Partial<SyncShape>): Promise<void> {
     await chrome.storage.sync.set(patch);
+  },
+  async getDevice(): Promise<DeviceInfo | undefined> {
+    const { device } = (await chrome.storage.local.get('device')) as LocalShape;
+    return device;
+  },
+  async setDevice(device: DeviceInfo): Promise<void> {
+    await chrome.storage.local.set({ device });
   },
   async getSiteSettings(origin: string): Promise<SiteSettings | undefined> {
     const { siteSettings } = (await chrome.storage.local.get('siteSettings')) as LocalShape;
@@ -92,10 +99,10 @@ export function defaultDeviceName(): string {
 }
 
 export async function ensureDeviceInfo(): Promise<DeviceInfo> {
-  const { device } = await storage.getSync();
-  if (device) return device;
+  const existing = await storage.getDevice();
+  if (existing) return existing;
   const newDevice: DeviceInfo = { id: crypto.randomUUID(), name: defaultDeviceName() };
-  await storage.setSync({ device: newDevice });
+  await storage.setDevice(newDevice);
   return newDevice;
 }
 

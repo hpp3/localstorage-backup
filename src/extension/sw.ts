@@ -105,7 +105,10 @@ async function disconnectDrive(): Promise<void> {
 }
 
 async function getStatus(origin?: string): Promise<Status> {
-  const { device, rootFolderId, email } = await storage.getSync();
+  const [{ rootFolderId, email }, device] = await Promise.all([
+    storage.getSync(),
+    storage.getDevice(),
+  ]);
   const driveConnected = !!device && !!rootFolderId;
   const status: Status = {
     driveConnected,
