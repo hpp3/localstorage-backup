@@ -4,6 +4,7 @@
   "version": "1.0.0",
   "description": "Back up any website's localStorage to your own Google Drive on a schedule. Perfect for preserving idle-game saves.",
   "homepage_url": "https://github.com/hpp3/localstorage-backup",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEApXZa6t79VnRtyL/Mq9VT0CjYRvMlxZMLhbYiDD4tJ8kiNy3y6dClTZaRaD0KUCmIzErFvy6nPCxcOw4VuPb36sgxYHJ0YSwoLqF8o28hXADmG/EEOvN0rL6iWehc+NjvDn1xPh4snxwOm38MqYWcS+c8f5H4vi6NwyZIJNKhbFgUvXp6PfuZDlnj89TF6kemJVBlzqVYDCXXe88enYgF8hFqlVLYErqXursYCpbX66i96+Y/jYwPmFg7NY1M56iWOl8jMjerq6P4kVf9OuAt2tSECbP8vQW2PZL1bYihV0cnbisEAAWjCXe6nx1o/+OwkCMmyR8T5sKLoup/pVrc/wIDAQAB",
   "icons": {
     "16": "icons/icon-16.png",
     "32": "icons/icon-32.png",
